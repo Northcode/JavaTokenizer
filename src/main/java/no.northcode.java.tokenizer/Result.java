@@ -2,6 +2,7 @@ package no.northcode.java.tokenizer;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class Result<T,Q> {
     T value;
@@ -42,6 +43,14 @@ public class Result<T,Q> {
 	} else {
 	    return Result.error(error);
 	}
+    }
+
+    public Stream<T> stream() {
+	Stream.Builder<T> builder = Stream.<T>builder();
+	if (is_ok) {
+	    builder.accept(value);
+	}
+	return builder.build();
     }
 
     public void consume(Consumer<T> consumer) {

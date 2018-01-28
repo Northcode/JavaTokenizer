@@ -19,12 +19,18 @@ public class Program {
 	    .flatMap(m -> tokenizer.add_matcher(m))
 	    .on_error(System.err::println);
 
-	tokenizer.tokenize("123this -3.14159is2a3test")
-	    .on_error(System.out::println)
-	    .consume(strem ->
-		     strem.forEach(t ->
-				   System.out.println(String.format("Token: { type: %d, parts: %s }", t.type, String.join(",", t.parts)))));
+	TokenPostProcessor postproc = new TokenPostProcessor();
 
+	postproc.ignore_whitespace();
+	postproc.add_rule(WORD, TokenPostProcessor.first);
+	postproc.add_rule(NUMBER, parts -> Integer.parseInt(parts.get(0)));
+
+	tokenizer.tokenize("123this 3.14159is2a3test")
+	    .on_error(System.out::println)
+	    .stream()
+	    .flatMap(s -> s)
+	    .flatMap(t -> postproc.process_token(t).stream())
+	    .forEach(t -> System.out.println(String.format("Pair: { first: %d, second: %s }", t.first, t.second)));
 	
 	
     }
